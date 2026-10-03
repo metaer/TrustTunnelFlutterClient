@@ -254,3 +254,62 @@ class PlatformFieldError {
 abstract class IDeepLink {
   String decode({required String uri});
 }
+
+/// {@template platform_installed_app}
+/// An application installed on the device that has a launcher entry.
+///
+/// Used to let users pick the applications that per-app routing (split
+/// tunneling) applies to.
+/// {@endtemplate}
+class PlatformInstalledApp {
+  /// {@template platform_installed_app_package_name}
+  /// Unique application identifier (Android package name).
+  /// {@endtemplate}
+  final String packageName;
+
+  /// {@template platform_installed_app_label}
+  /// User-visible application name.
+  /// {@endtemplate}
+  final String label;
+
+  /// {@template platform_installed_app_is_system}
+  /// Whether the application is preinstalled (a system app or an update of one).
+  /// {@endtemplate}
+  final bool isSystem;
+
+  /// {@macro platform_installed_app}
+  const PlatformInstalledApp({
+    required this.packageName,
+    required this.label,
+    required this.isSystem,
+  });
+}
+
+/// {@template i_installed_apps}
+/// Host-side directory of installed applications.
+///
+/// Implemented on Android only; other platforms never register it, so calls
+/// fail with a channel error there.
+/// {@endtemplate}
+@HostApi()
+abstract class IInstalledApps {
+  /// {@template i_installed_apps_get_installed_apps}
+  /// Returns every application with a launcher entry, excluding the calling
+  /// application. The order is unspecified.
+  ///
+  /// This call is executed on a serial background task queue because querying
+  /// the package manager may block.
+  /// {@endtemplate}
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  List<PlatformInstalledApp> getInstalledApps();
+
+  /// {@template i_installed_apps_get_app_icon}
+  /// Returns the launcher icon of [packageName] encoded as PNG, or `null` if the
+  /// application is not installed.
+  ///
+  /// This call is executed on a serial background task queue because icon
+  /// rendering may be slow.
+  /// {@endtemplate}
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
+  Uint8List? getAppIcon({required String packageName});
+}
