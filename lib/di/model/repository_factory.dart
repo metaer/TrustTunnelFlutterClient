@@ -1,6 +1,7 @@
 import 'package:trusttunnel/data/repository/auto_connect_on_launch_settings_repository.dart';
 import 'package:trusttunnel/data/repository/deep_link_repository.dart';
 import 'package:trusttunnel/data/repository/export_logs_repository.dart';
+import 'package:trusttunnel/data/repository/installed_apps_repository.dart';
 import 'package:trusttunnel/data/repository/launch_at_login_repository.dart';
 import 'package:trusttunnel/data/repository/logging_settings_repository.dart';
 import 'package:trusttunnel/data/repository/open_main_window_on_login_repository.dart';
@@ -30,6 +31,8 @@ abstract class RepositoryFactory {
   OpenMainWindowOnLoginRepository get openMainWindowOnLoginRepository;
 
   AutoConnectOnLaunchSettingsRepository get autoConnectOnLaunchSettingsRepository;
+
+  InstalledAppsRepository get installedAppsRepository;
 }
 
 class RepositoryFactoryImpl implements RepositoryFactory {
@@ -58,6 +61,8 @@ class RepositoryFactoryImpl implements RepositoryFactory {
   OpenMainWindowOnLoginRepository? _openMainWindowOnLoginRepository;
 
   AutoConnectOnLaunchSettingsRepository? _autoConnectOnLaunchSettingsRepository;
+
+  InstalledAppsRepository? _installedAppsRepository;
 
   @override
   ServerRepository get serverRepository => _serverRepository ??= ServerRepositoryImpl(
@@ -112,4 +117,9 @@ class RepositoryFactoryImpl implements RepositoryFactory {
       _autoConnectOnLaunchSettingsRepository ??= AutoConnectOnLaunchSettingsRepositoryImpl(
         dataSource: _dependencyFactory.autoConnectOnLaunchSettingsDataSource,
       );
+
+  @override
+  InstalledAppsRepository get installedAppsRepository => _installedAppsRepository ??= InstalledAppsRepositoryImpl(
+    dataSource: _dependencyFactory.installedAppsDataSource,
+  );
 }

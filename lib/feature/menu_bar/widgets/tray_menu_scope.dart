@@ -23,6 +23,7 @@ import 'package:trusttunnel/feature/settings/app_logging/widgets/scope/app_loggi
 import 'package:trusttunnel/feature/settings/app_logging/widgets/scope/app_logging_scope_controller.dart';
 import 'package:trusttunnel/feature/settings/excluded_routes/widgets/scope/excluded_routes_scope.dart';
 import 'package:trusttunnel/feature/settings/logs_manager/widgets/scope/logs_manager_scope.dart';
+import 'package:trusttunnel/feature/settings/split_tunnel/widgets/scope/split_tunnel_scope.dart';
 import 'package:trusttunnel/feature/vpn/models/vpn_controller.dart';
 import 'package:trusttunnel/feature/vpn/widgets/vpn_scope.dart';
 
@@ -205,6 +206,14 @@ class _TrayMenuScopeState extends State<TrayMenuScope> {
       return;
     }
 
+    final splitTunnelController = SplitTunnelScope.controllerOf(
+      context,
+      listen: false,
+    );
+    if (!splitTunnelController.isLoaded) {
+      return;
+    }
+
     final routingController = RoutingScope.controllerOf(
       context,
       listen: false,
@@ -229,6 +238,7 @@ class _TrayMenuScopeState extends State<TrayMenuScope> {
       server: server,
       routingProfile: routingProfile,
       excludedRoutes: excludedRoutes,
+      splitTunnel: splitTunnelController.savedSettings,
       logLevel: switch (_appLoggingController.securityType) {
         LoggingSecurityType.stripped => VpnConfigurationLogLevel.error,
         LoggingSecurityType.full => switch (_appLoggingController.loggingLevel) {

@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:trusttunnel/common/localization/localization.dart';
 import 'package:trusttunnel/data/model/routing_profile.dart';
 import 'package:trusttunnel/data/model/server.dart';
+import 'package:trusttunnel/data/model/split_tunnel_settings.dart';
 import 'package:trusttunnel/data/model/vpn_configuration_log_level.dart';
 import 'package:trusttunnel/data/model/vpn_log.dart';
 import 'package:trusttunnel/data/model/vpn_state.dart';
@@ -20,7 +21,8 @@ import 'package:trusttunnel/feature/vpn/models/vpn_controller.dart';
 /// Signature of the "start VPN" operation used by [VpnScope].
 ///
 /// The callback starts a VPN session for the given [server] and [routingProfile]
-/// and applies [excludedRoutes] (typically CIDR ranges) and [logLevel] as part of the configuration.
+/// and applies [excludedRoutes] (typically CIDR ranges), [splitTunnel] (per-app
+/// routing, Android only) and [logLevel] as part of the configuration.
 ///
 /// The concrete behavior depends on the platform/backend implementation behind
 /// the repository, but the callback is expected to complete only after the
@@ -32,6 +34,7 @@ typedef UpdateVpnCallback =
       required Server server,
       required RoutingProfile routingProfile,
       required List<String> excludedRoutes,
+      required SplitTunnelSettings splitTunnel,
       required VpnConfigurationLogLevel logLevel,
     });
 
@@ -249,6 +252,7 @@ class _VpnScopeState extends State<VpnScope> {
     required Server server,
     required RoutingProfile routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   }) async {
     await _stop();
@@ -257,6 +261,7 @@ class _VpnScopeState extends State<VpnScope> {
       server: server,
       routingProfile: routingProfile,
       excludedRoutes: excludedRoutes,
+      splitTunnel: splitTunnel,
       logLevel: logLevel,
     );
   }
@@ -265,11 +270,13 @@ class _VpnScopeState extends State<VpnScope> {
     required Server server,
     required RoutingProfile routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   }) => widget.vpnRepository.updateConfiguration(
     server: server,
     routingProfile: routingProfile,
     excludedRoutes: excludedRoutes,
+    splitTunnel: splitTunnel,
     logLevel: logLevel,
   );
 
@@ -427,11 +434,13 @@ class _InheritedVpnScope extends InheritedModel<VpnAspect> implements VpnControl
     required Server server,
     required RoutingProfile routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   }) => _onStart(
     server: server,
     routingProfile: routingProfile,
     excludedRoutes: excludedRoutes,
+    splitTunnel: splitTunnel,
     logLevel: logLevel,
   );
 
@@ -440,11 +449,13 @@ class _InheritedVpnScope extends InheritedModel<VpnAspect> implements VpnControl
     required Server server,
     required RoutingProfile routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   }) => _updateConfiguration(
     server: server,
     routingProfile: routingProfile,
     excludedRoutes: excludedRoutes,
+    splitTunnel: splitTunnel,
     logLevel: logLevel,
   );
 

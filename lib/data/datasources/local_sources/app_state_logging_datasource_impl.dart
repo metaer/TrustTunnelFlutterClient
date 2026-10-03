@@ -39,6 +39,7 @@ final class AppStateLoggingDataSourceImpl implements AppStateLoggingDataSource {
     final serversFuture = _serverDataSource.getAllServers();
     final routingProfilesFuture = _routingDataSource.getAllProfiles();
     final excludedRoutesFuture = _settingsDataSource.getExcludedRoutes();
+    final splitTunnelSettingsFuture = _settingsDataSource.getSplitTunnelSettings();
     final queryLogsFuture = _database.select(_database.vpnRequests).get();
     final vpnStatusFuture = _collectVpnStatus();
     final databaseSnapshotFuture = _collectDatabaseSnapshot();
@@ -47,6 +48,7 @@ final class AppStateLoggingDataSourceImpl implements AppStateLoggingDataSource {
     final servers = await serversFuture;
     final routingProfiles = await routingProfilesFuture;
     final excludedRoutes = await excludedRoutesFuture;
+    final splitTunnelSettings = await splitTunnelSettingsFuture;
     final queryLogs = await queryLogsFuture;
     final vpnStatus = await vpnStatusFuture;
     final databaseSnapshot = await databaseSnapshotFuture;
@@ -79,6 +81,10 @@ final class AppStateLoggingDataSourceImpl implements AppStateLoggingDataSource {
       excludedRoutes: ExcludedRoutesSnapshot.fromRoutes(
         excludedRoutes,
         includeItems: includeSensitiveData,
+      ),
+      splitTunnel: SplitTunnelSnapshot.fromSettings(
+        splitTunnelSettings,
+        includeApps: includeSensitiveData,
       ),
       queryLog: QueryLogSnapshot.fromRows(
         queryLogs,

@@ -200,5 +200,27 @@
   "openHomeScreenAutomatically": "Open Home screen automatically",
   "connection": "Connection",
   "autoConnectOnAppLaunch": "Auto-connect on app launch",
-  "autoConnectNoServersAdded": "No servers added. To apply the setting, add a server"
+  "autoConnectNoServersAdded": "No servers added. To apply the setting, add a server",
+  "splitTunneling": "Split tunneling",
+  "splitTunnelingDescription": "Choose which apps use the VPN. When you save, a connected VPN reconnects to apply the changes",
+  "splitTunnelingModeOff": "Off",
+  "splitTunnelingModeOffDescription": "All apps use the VPN",
+  "splitTunnelingModeInclude": "Only selected apps",
+  "splitTunnelingModeIncludeDescription": "Only the selected apps use the VPN. All other apps connect directly",
+  "splitTunnelingModeExclude": "All apps except selected",
+  "splitTunnelingModeExcludeDescription": "The selected apps connect directly. All other apps use the VPN",
+  "splitTunnelingSearchApps": "Search apps",
+  "splitTunnelingSelectedApps": "Selected apps: {count}",
+  "@splitTunnelingSelectedApps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "splitTunnelingNoAppsFound": "No apps found",
+  "splitTunnelingSelectAtLeastOneApp": "Select at least one app to save",
+  "splitTunnelingAppNotInstalled": "Not installed",
+  "splitTunnelingAppsLoadError": "Couldn’t load the list of installed apps",
+  "splitTunnelingRetry": "Retry"
 }

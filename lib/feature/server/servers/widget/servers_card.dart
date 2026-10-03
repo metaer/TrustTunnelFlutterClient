@@ -12,6 +12,7 @@ import 'package:trusttunnel/feature/server/servers/widget/scope/servers_scope_as
 import 'package:trusttunnel/feature/server/servers/widget/servers_card_connection_button.dart';
 import 'package:trusttunnel/feature/settings/app_logging/widgets/scope/app_logging_scope.dart';
 import 'package:trusttunnel/feature/settings/excluded_routes/widgets/scope/excluded_routes_scope.dart';
+import 'package:trusttunnel/feature/settings/split_tunnel/widgets/scope/split_tunnel_scope.dart';
 import 'package:trusttunnel/feature/vpn/widgets/vpn_scope.dart';
 import 'package:trusttunnel/widgets/common/custom_list_tile_separated.dart';
 
@@ -101,6 +102,11 @@ class _ServersCardState extends State<ServersCard> {
       return;
     }
 
+    final splitTunnelController = SplitTunnelScope.controllerOf(context, listen: false);
+    if (!splitTunnelController.isLoaded) {
+      return;
+    }
+
     final logLevel = switch (loggingController.securityType) {
       LoggingSecurityType.stripped => VpnConfigurationLogLevel.error,
       LoggingSecurityType.full => switch (loggingController.loggingLevel) {
@@ -118,6 +124,7 @@ class _ServersCardState extends State<ServersCard> {
       server: server,
       routingProfile: routingProfile,
       excludedRoutes: excludedRoutes,
+      splitTunnel: splitTunnelController.savedSettings,
       logLevel: logLevel,
     );
   }

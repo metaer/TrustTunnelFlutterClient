@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:trusttunnel/data/datasources/vpn_datasource.dart';
 import 'package:trusttunnel/data/model/routing_profile.dart';
 import 'package:trusttunnel/data/model/server.dart';
+import 'package:trusttunnel/data/model/split_tunnel_settings.dart';
 import 'package:trusttunnel/data/model/vpn_configuration_log_level.dart';
 import 'package:trusttunnel/data/model/vpn_log.dart';
 import 'package:trusttunnel/data/model/vpn_state.dart';
@@ -12,6 +13,7 @@ abstract class VpnRepository {
     required Server server,
     required RoutingProfile routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   });
 
@@ -21,6 +23,7 @@ abstract class VpnRepository {
     required Server server,
     required RoutingProfile routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   });
 
@@ -44,12 +47,14 @@ class VpnRepositoryImpl implements VpnRepository {
   Future<void> start({
     required Server server,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required RoutingProfile routingProfile,
     required VpnConfigurationLogLevel logLevel,
   }) => _vpnDataSource.start(
     server: server.serverData,
     routingProfile: routingProfile.data,
     excludedRoutes: excludedRoutes,
+    splitTunnel: splitTunnel,
     logLevel: logLevel,
   );
 
@@ -70,12 +75,14 @@ class VpnRepositoryImpl implements VpnRepository {
     required Server server,
     required RoutingProfile routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   }) async {
     await _vpnDataSource.updateConfiguration(
       server: server.serverData,
       routingProfile: routingProfile.data,
       excludedRoutes: excludedRoutes,
+      splitTunnel: splitTunnel,
       logLevel: logLevel,
     );
   }

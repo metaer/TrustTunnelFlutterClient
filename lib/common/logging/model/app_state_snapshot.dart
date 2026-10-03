@@ -5,6 +5,7 @@ import 'package:trusttunnel/data/database/app_database.dart' as db;
 import 'package:trusttunnel/data/model/certificate.dart';
 import 'package:trusttunnel/data/model/routing_profile.dart';
 import 'package:trusttunnel/data/model/server.dart';
+import 'package:trusttunnel/data/model/split_tunnel_settings.dart';
 
 typedef JsonMap = Map<String, Object?>;
 
@@ -17,6 +18,7 @@ final class AppStateSnapshot {
   final ServersSnapshot servers;
   final RoutingProfilesSnapshot routingProfiles;
   final ExcludedRoutesSnapshot excludedRoutes;
+  final SplitTunnelSnapshot splitTunnel;
   final QueryLogSnapshot queryLog;
 
   const AppStateSnapshot({
@@ -27,6 +29,7 @@ final class AppStateSnapshot {
     required this.servers,
     required this.routingProfiles,
     required this.excludedRoutes,
+    required this.splitTunnel,
     required this.queryLog,
   });
 
@@ -38,6 +41,7 @@ final class AppStateSnapshot {
     'servers': servers.toJson(),
     'routingProfiles': routingProfiles.toJson(),
     'excludedRoutes': excludedRoutes.toJson(),
+    'splitTunnel': splitTunnel.toJson(),
     'queryLog': queryLog.toJson(),
   };
 }
@@ -365,6 +369,34 @@ final class ExcludedRoutesSnapshot {
   JsonMap toJson() => {
     'count': count,
     if (items != null) 'items': items,
+  };
+}
+
+@immutable
+final class SplitTunnelSnapshot {
+  final String mode;
+  final int appsCount;
+  final List<String>? apps;
+
+  const SplitTunnelSnapshot({
+    required this.mode,
+    required this.appsCount,
+    required this.apps,
+  });
+
+  factory SplitTunnelSnapshot.fromSettings(
+    SplitTunnelSettings settings, {
+    required bool includeApps,
+  }) => SplitTunnelSnapshot(
+    mode: settings.mode.value,
+    appsCount: settings.apps.length,
+    apps: includeApps ? settings.apps : null,
+  );
+
+  JsonMap toJson() => {
+    'mode': mode,
+    'appsCount': appsCount,
+    if (apps != null) 'splitTunnelApps': apps,
   };
 }
 

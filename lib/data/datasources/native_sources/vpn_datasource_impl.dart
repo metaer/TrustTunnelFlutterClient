@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:adguard_logger/adguard_logger.dart';
+import 'package:flutter/foundation.dart';
 import 'package:trusttunnel/common/extensions/model_extensions.dart';
 import 'package:trusttunnel/common/logging/extensions/vpn_logger_extension.dart';
+import 'package:trusttunnel/common/utils/split_tunnel_mode_encoder.dart';
 import 'package:trusttunnel/common/utils/upstream_protocol_encoder.dart';
 import 'package:trusttunnel/common/utils/validation_utils.dart';
 import 'package:trusttunnel/common/utils/vpn_mode_encoder.dart';
@@ -10,6 +12,7 @@ import 'package:trusttunnel/data/datasources/vpn_datasource.dart';
 import 'package:trusttunnel/data/model/routing_mode.dart';
 import 'package:trusttunnel/data/model/routing_profile_data.dart';
 import 'package:trusttunnel/data/model/server_data.dart';
+import 'package:trusttunnel/data/model/split_tunnel_settings.dart';
 import 'package:trusttunnel/data/model/vpn_configuration_log_level.dart';
 import 'package:trusttunnel/data/model/vpn_log.dart';
 import 'package:trusttunnel/data/model/vpn_logging_payload.dart';
@@ -99,9 +102,11 @@ class VpnDataSourceImpl implements VpnDataSource {
     required ServerData server,
     required RoutingProfileData routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   }) async {
     final exclusions = _getExclusionsByMode(routingProfile);
+    final effectiveSplitTunnel = _resolveSplitTunnel(splitTunnel);
 
     final endPoint = Endpoint(
       name: server.name,
@@ -131,6 +136,10 @@ class VpnDataSourceImpl implements VpnDataSource {
         endpoint: endPoint,
         tun: Tun(
           excludedRoutes: excludedRoutes,
+          splitTunnelMode: SplitTunnelModeEncoder().convert(
+            effectiveSplitTunnel.mode,
+          ),
+          splitTunnelApps: effectiveSplitTunnel.apps,
         ),
         socks: const Socks(),
       ),
@@ -144,6 +153,7 @@ class VpnDataSourceImpl implements VpnDataSource {
           server: server,
           routingProfile: routingProfile,
           excludedRoutes: excludedRoutes,
+          splitTunnel: effectiveSplitTunnel,
         ).toJson(),
       );
 
@@ -176,9 +186,11 @@ class VpnDataSourceImpl implements VpnDataSource {
     required ServerData server,
     required RoutingProfileData routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   }) async {
     final exclusions = _getExclusionsByMode(routingProfile);
+    final effectiveSplitTunnel = _resolveSplitTunnel(splitTunnel);
 
     final endPoint = Endpoint(
       name: server.name,
@@ -208,6 +220,10 @@ class VpnDataSourceImpl implements VpnDataSource {
         endpoint: endPoint,
         tun: Tun(
           excludedRoutes: excludedRoutes,
+          splitTunnelMode: SplitTunnelModeEncoder().convert(
+            effectiveSplitTunnel.mode,
+          ),
+          splitTunnelApps: effectiveSplitTunnel.apps,
         ),
         socks: const Socks(),
       ),
@@ -221,6 +237,7 @@ class VpnDataSourceImpl implements VpnDataSource {
           server: server,
           routingProfile: routingProfile,
           excludedRoutes: excludedRoutes,
+          splitTunnel: effectiveSplitTunnel,
         ).toJson(),
       );
 
@@ -275,6 +292,14 @@ class VpnDataSourceImpl implements VpnDataSource {
       ...parsedDomains,
     }.toList();
   }
+
+  /// Per-app routing is an Android `VpnService.Builder` feature, so every other
+  /// platform gets [SplitTunnelSettings.off] and keeps its configuration unchanged.
+  /// The selection kept while routing is off is not sent either.
+  SplitTunnelSettings _resolveSplitTunnel(SplitTunnelSettings splitTunnel) =>
+      defaultTargetPlatform == TargetPlatform.android && splitTunnel.isEnabled
+      ? splitTunnel
+      : const SplitTunnelSettings.off();
 
   ConfigurationLogLevel _convertLogLevel(VpnConfigurationLogLevel logLevel) => switch (logLevel) {
     VpnConfigurationLogLevel.error => ConfigurationLogLevel.error,

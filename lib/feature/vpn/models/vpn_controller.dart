@@ -1,5 +1,6 @@
 import 'package:trusttunnel/data/model/routing_profile.dart';
 import 'package:trusttunnel/data/model/server.dart';
+import 'package:trusttunnel/data/model/split_tunnel_settings.dart';
 import 'package:trusttunnel/data/model/vpn_configuration_log_level.dart';
 import 'package:trusttunnel/data/model/vpn_state.dart';
 
@@ -10,6 +11,7 @@ mixin VpnController {
     required Server server,
     required RoutingProfile routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   });
 
@@ -17,6 +19,7 @@ mixin VpnController {
     required Server server,
     required RoutingProfile routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   });
 

@@ -10,6 +10,8 @@ import 'package:trusttunnel/feature/settings/launch_and_connection/widgets/scope
 import 'package:trusttunnel/feature/settings/query_log/widgets/query_log_screen.dart';
 import 'package:trusttunnel/feature/settings/settings/widgets/download_app_logs_tile.dart';
 import 'package:trusttunnel/feature/settings/settings_about/about_screen.dart';
+import 'package:trusttunnel/feature/settings/split_tunnel/widgets/scope/installed_apps_scope.dart';
+import 'package:trusttunnel/feature/settings/split_tunnel/widgets/split_tunnel_screen.dart';
 import 'package:trusttunnel/widgets/common/custom_arrow_list_tile.dart';
 import 'package:trusttunnel/widgets/custom_app_bar.dart';
 import 'package:trusttunnel/widgets/scaffold_wrapper.dart';
@@ -50,6 +52,13 @@ class SettingsScreen extends StatelessWidget {
               onTap: () => _pushExcludedRoutesScreen(context),
             ),
             const Divider(),
+            if (defaultTargetPlatform == TargetPlatform.android) ...[
+              CustomArrowListTile(
+                title: context.ln.splitTunneling,
+                onTap: () => _pushSplitTunnelScreen(context),
+              ),
+              const Divider(),
+            ],
             CustomArrowListTile(
               title: context.ln.followUsOnGithub,
               onTap: _openGithubOrganization,
@@ -81,6 +90,12 @@ class SettingsScreen extends StatelessWidget {
 
   void _pushExcludedRoutesScreen(BuildContext context) => context.push(
     const ExcludedRoutesScreen(),
+  );
+
+  void _pushSplitTunnelScreen(BuildContext context) => context.push(
+    const InstalledAppsScope(
+      child: SplitTunnelScreen(),
+    ),
   );
 
   void _pushAboutScreen(BuildContext context) => context.push(

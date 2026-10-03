@@ -1,31 +1,41 @@
 import 'package:trusttunnel/data/model/routing_profile_data.dart';
 import 'package:trusttunnel/data/model/server_data.dart';
+import 'package:trusttunnel/data/model/split_tunnel_settings.dart';
 
 final class VpnLoggingPayload {
   final VpnLoggingServerPayload serverPayload;
   final VpnLoggingRoutingProfilePayload routingProfilePayload;
   final List<String> excludedRoutes;
+  final String splitTunnelMode;
+  final List<String> splitTunnelApps;
 
   const VpnLoggingPayload({
     required this.serverPayload,
     required this.routingProfilePayload,
     required this.excludedRoutes,
+    required this.splitTunnelMode,
+    required this.splitTunnelApps,
   });
 
   factory VpnLoggingPayload.fromModels({
     required ServerData server,
     required RoutingProfileData routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
   }) => VpnLoggingPayload(
     serverPayload: VpnLoggingServerPayload.fromModel(server),
     routingProfilePayload: VpnLoggingRoutingProfilePayload.fromModel(routingProfile),
     excludedRoutes: List.unmodifiable(excludedRoutes),
+    splitTunnelMode: splitTunnel.mode.value,
+    splitTunnelApps: List.unmodifiable(splitTunnel.apps),
   );
 
   Map<String, Object?> toJson() => {
     'server': serverPayload.toJson(),
     'routingProfile': routingProfilePayload.toJson(),
     'excludedRoutes': excludedRoutes,
+    'splitTunnelMode': splitTunnelMode,
+    'splitTunnelApps': splitTunnelApps,
   };
 }
 

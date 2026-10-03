@@ -65,6 +65,8 @@ class TrustTunnelSensitiveDataSanitizer {
     'excluded_routes',
     'initialExcludedRoutes',
     'initial_excluded_routes',
+    'splitTunnelApps',
+    'split_tunnel_apps',
   };
 
   /// DNS address rules whose values are reduced to a default/custom placeholder in stripped logging mode.

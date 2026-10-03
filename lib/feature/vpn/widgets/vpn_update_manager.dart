@@ -5,6 +5,7 @@ import 'package:trusttunnel/common/logging/enum/logging_level.dart';
 import 'package:trusttunnel/common/logging/enum/logging_security_type.dart';
 import 'package:trusttunnel/data/model/routing_profile.dart';
 import 'package:trusttunnel/data/model/server.dart';
+import 'package:trusttunnel/data/model/split_tunnel_settings.dart';
 import 'package:trusttunnel/data/model/vpn_configuration_log_level.dart';
 import 'package:trusttunnel/data/model/vpn_state.dart';
 import 'package:trusttunnel/feature/routing/routing/widgets/scope/routing_scope.dart';
@@ -14,6 +15,8 @@ import 'package:trusttunnel/feature/server/servers/widget/scope/servers_scope_as
 import 'package:trusttunnel/feature/settings/app_logging/widgets/scope/app_logging_scope.dart';
 import 'package:trusttunnel/feature/settings/excluded_routes/widgets/scope/excluded_routes_aspect.dart';
 import 'package:trusttunnel/feature/settings/excluded_routes/widgets/scope/excluded_routes_scope.dart';
+import 'package:trusttunnel/feature/settings/split_tunnel/widgets/scope/split_tunnel_aspect.dart';
+import 'package:trusttunnel/feature/settings/split_tunnel/widgets/scope/split_tunnel_scope.dart';
 import 'package:trusttunnel/feature/vpn/models/vpn_controller.dart';
 import 'package:trusttunnel/feature/vpn/widgets/vpn_scope.dart';
 
@@ -33,6 +36,7 @@ class _VpnUpdateManagerState extends State<VpnUpdateManager> {
   Server? _selectedServer;
   RoutingProfile? _selectedRoutingProfile;
   List<String>? _excludedRoutes;
+  SplitTunnelSettings? _splitTunnelSettings;
   VpnConfigurationLogLevel? _selectedLogLevel;
 
   @override
@@ -68,6 +72,13 @@ class _VpnUpdateManagerState extends State<VpnUpdateManager> {
     );
 
     final updatedExcludedRoutes = excludedRoutesController.excludedRoutes;
+
+    final splitTunnelController = SplitTunnelScope.controllerOf(
+      context,
+      aspect: SplitTunnelAspect.settings,
+    );
+
+    final updatedSplitTunnelSettings = splitTunnelController.savedSettings;
 
     final vpnController = VpnScope.vpnControllerOf(
       context,
@@ -112,11 +123,19 @@ class _VpnUpdateManagerState extends State<VpnUpdateManager> {
       return;
     }
 
+    // Comparing against the default before the first read would restart the VPN for nothing.
+    if (!splitTunnelController.isLoaded) {
+      return;
+    }
+
+    final splitTunnelSettings = _splitTunnelSettings ??= updatedSplitTunnelSettings;
+
     final bool isConfigurationChanged =
         _selectedServer != updatedServer ||
         _selectedRoutingProfile != updatedRoutingProfile ||
         _selectedLogLevel != currentNeededVpnConfigurationLogLevel ||
-        !listEquals(_excludedRoutes, updatedExcludedRoutes);
+        !listEquals(_excludedRoutes, updatedExcludedRoutes) ||
+        !splitTunnelSettings.isEquivalentTo(updatedSplitTunnelSettings);
 
     if (isConfigurationChanged) {
       if ((_selectedServer?.id == updatedServer?.id && vpnController.state == VpnState.disconnected) || wasDeleted) {
@@ -131,6 +150,7 @@ class _VpnUpdateManagerState extends State<VpnUpdateManager> {
           server: updatedServer!,
           routingProfile: updatedRoutingProfile,
           excludedRoutes: updatedExcludedRoutes,
+          splitTunnel: updatedSplitTunnelSettings,
           logLevel: currentNeededVpnConfigurationLogLevel,
         );
       } else {
@@ -139,6 +159,7 @@ class _VpnUpdateManagerState extends State<VpnUpdateManager> {
           server: updatedServer!,
           routingProfile: updatedRoutingProfile,
           excludedRoutes: updatedExcludedRoutes,
+          splitTunnel: updatedSplitTunnelSettings,
           logLevel: currentNeededVpnConfigurationLogLevel,
         );
       }
@@ -153,11 +174,13 @@ class _VpnUpdateManagerState extends State<VpnUpdateManager> {
     required Server server,
     required RoutingProfile routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   }) async {
     _selectedServer = server;
     _selectedRoutingProfile = routingProfile;
     _excludedRoutes = excludedRoutes;
+    _splitTunnelSettings = splitTunnel;
     _selectedLogLevel = logLevel;
 
     await controller.stop();
@@ -165,6 +188,7 @@ class _VpnUpdateManagerState extends State<VpnUpdateManager> {
       server: server,
       routingProfile: routingProfile,
       excludedRoutes: excludedRoutes,
+      splitTunnel: splitTunnel,
       logLevel: logLevel,
     );
   }
@@ -175,6 +199,7 @@ class _VpnUpdateManagerState extends State<VpnUpdateManager> {
     _selectedServer = null;
     _selectedRoutingProfile = null;
     _excludedRoutes = null;
+    _splitTunnelSettings = null;
     _selectedLogLevel = null;
     await controller.deleteConfiguration();
   }
@@ -183,17 +208,20 @@ class _VpnUpdateManagerState extends State<VpnUpdateManager> {
     required Server server,
     required RoutingProfile routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnController controller,
     required VpnConfigurationLogLevel logLevel,
   }) async {
     _selectedServer = server;
     _selectedRoutingProfile = routingProfile;
     _excludedRoutes = excludedRoutes;
+    _splitTunnelSettings = splitTunnel;
     _selectedLogLevel = logLevel;
     await controller.start(
       server: server,
       routingProfile: routingProfile,
       excludedRoutes: excludedRoutes,
+      splitTunnel: splitTunnel,
       logLevel: logLevel,
     );
   }

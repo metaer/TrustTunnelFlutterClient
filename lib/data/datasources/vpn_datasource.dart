@@ -1,5 +1,6 @@
 import 'package:trusttunnel/data/model/routing_profile_data.dart';
 import 'package:trusttunnel/data/model/server_data.dart';
+import 'package:trusttunnel/data/model/split_tunnel_settings.dart';
 import 'package:trusttunnel/data/model/vpn_configuration_log_level.dart';
 import 'package:trusttunnel/data/model/vpn_log.dart';
 import 'package:trusttunnel/data/model/vpn_state.dart';
@@ -45,6 +46,10 @@ abstract class VpnDataSource {
   /// - initiating the VPN engine/service on the platform,
   /// - making state and log streams available.
   ///
+  /// [splitTunnel] selects the apps that use the tunnel. Per-app routing is
+  /// supported **only on Android**; implementations coerce the value to
+  /// [SplitTunnelSettings.off] on every other platform.
+  ///
   /// This method completes when the start request has been issued to the backend,
   /// not necessarily when the VPN reaches a connected state.
   /// {@endtemplate}
@@ -52,6 +57,7 @@ abstract class VpnDataSource {
     required ServerData server,
     required RoutingProfileData routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   });
 
@@ -74,6 +80,7 @@ abstract class VpnDataSource {
     required ServerData server,
     required RoutingProfileData routingProfile,
     required List<String> excludedRoutes,
+    required SplitTunnelSettings splitTunnel,
     required VpnConfigurationLogLevel logLevel,
   });
 

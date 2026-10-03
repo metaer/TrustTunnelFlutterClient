@@ -9,6 +9,7 @@ import 'package:trusttunnel/data/database/app_database.dart' as db;
 import 'package:trusttunnel/data/datasources/app_state_logging_datasource.dart';
 import 'package:trusttunnel/data/datasources/auto_connect_on_launch_settings_datasource.dart';
 import 'package:trusttunnel/data/datasources/certificate_datasource.dart';
+import 'package:trusttunnel/data/datasources/installed_apps_datasource.dart';
 import 'package:trusttunnel/data/datasources/launch_at_login_datasource.dart';
 import 'package:trusttunnel/data/datasources/local_sources/app_state_logging_datasource_impl.dart';
 import 'package:trusttunnel/data/datasources/local_sources/auto_connect_on_launch_settings_datasource_impl.dart';
@@ -22,6 +23,7 @@ import 'package:trusttunnel/data/datasources/local_sources/settings_datasource_i
 import 'package:trusttunnel/data/datasources/logging_settings_datasource.dart';
 import 'package:trusttunnel/data/datasources/logs_export_destination_datasource.dart';
 import 'package:trusttunnel/data/datasources/logs_local_source.dart';
+import 'package:trusttunnel/data/datasources/native_sources/installed_apps_datasource_impl.dart';
 import 'package:trusttunnel/data/datasources/native_sources/launch_at_login_datasource_impl.dart';
 import 'package:trusttunnel/data/datasources/native_sources/open_main_window_on_login_datasource_impl.dart';
 import 'package:trusttunnel/data/datasources/native_sources/vpn_datasource_impl.dart';
@@ -33,6 +35,7 @@ import 'package:trusttunnel/data/datasources/vpn_datasource.dart';
 import 'package:trusttunnel/feature/app/controller/app_window_controller.dart';
 import 'package:trusttunnel/feature/app/controller/macos_app_window_controller.dart';
 import 'package:vpn_plugin/deep_link_manager.dart';
+import 'package:vpn_plugin/installed_apps_manager.dart';
 import 'package:vpn_plugin/vpn_plugin.dart';
 
 abstract class DependencyFactory {
@@ -48,6 +51,8 @@ abstract class DependencyFactory {
 
   DeepLinkManager get deepLinkManager;
 
+  InstalledAppsManager get installedAppsManager;
+
   SettingsDataSource get settingsDataSource;
 
   ServerDataSource get serverDataSource;
@@ -55,6 +60,8 @@ abstract class DependencyFactory {
   RoutingDataSource get routingDataSource;
 
   VpnDataSource get vpnDataSource;
+
+  InstalledAppsDataSource get installedAppsDataSource;
 
   CertificateDataSource get certificateDataSource;
 
@@ -99,6 +106,8 @@ class DependencyFactoryImpl implements DependencyFactory {
 
   DeepLinkManager? _deepLinkManager;
 
+  InstalledAppsManager? _installedAppsManager;
+
   SettingsDataSource? _settingsDataSource;
 
   ServerDataSource? _serverDataSource;
@@ -106,6 +115,8 @@ class DependencyFactoryImpl implements DependencyFactory {
   RoutingDataSource? _routingDataSource;
 
   VpnDataSource? _vpnDataSource;
+
+  InstalledAppsDataSource? _installedAppsDataSource;
 
   CertificateDataSource? _certificateDataSource;
 
@@ -137,6 +148,9 @@ class DependencyFactoryImpl implements DependencyFactory {
   DeepLinkManager get deepLinkManager => _deepLinkManager ??= DeepLinkManagerImpl();
 
   @override
+  InstalledAppsManager get installedAppsManager => _installedAppsManager ??= InstalledAppsManagerImpl();
+
+  @override
   SettingsDataSource get settingsDataSource => _settingsDataSource ??= SettingsDataSourceImpl(database: database);
 
   @override
@@ -153,6 +167,11 @@ class DependencyFactoryImpl implements DependencyFactory {
   @override
   VpnDataSource get vpnDataSource => _vpnDataSource ??= VpnDataSourceImpl(
     vpnPlugin: vpnPlugin,
+  );
+
+  @override
+  InstalledAppsDataSource get installedAppsDataSource => _installedAppsDataSource ??= InstalledAppsDataSourceImpl(
+    installedAppsManager: installedAppsManager,
   );
 
   @override

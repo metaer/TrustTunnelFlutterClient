@@ -13,6 +13,8 @@ import 'package:trusttunnel/feature/settings/app_logging/widgets/scope/app_loggi
 import 'package:trusttunnel/feature/settings/excluded_routes/widgets/scope/excluded_routes_scope.dart';
 import 'package:trusttunnel/feature/settings/launch_and_connection/controller/auto_connect_on_launch_controller.dart';
 import 'package:trusttunnel/feature/settings/launch_and_connection/controller/auto_connect_on_launch_state.dart';
+import 'package:trusttunnel/feature/settings/split_tunnel/widgets/scope/split_tunnel_aspect.dart';
+import 'package:trusttunnel/feature/settings/split_tunnel/widgets/scope/split_tunnel_scope.dart';
 import 'package:trusttunnel/feature/vpn/widgets/vpn_scope.dart';
 
 /// Restores the last VPN connection when automatic connection on launch is enabled.
@@ -86,6 +88,15 @@ class _AutoConnectOnLaunchSettingsScopeState extends State<AutoConnectOnLaunchSe
       return;
     }
 
+    // Wait for the saved split tunneling settings so the connection uses them.
+    final splitTunnelController = SplitTunnelScope.controllerOf(
+      context,
+      aspect: SplitTunnelAspect.settings,
+    );
+    if (!splitTunnelController.isLoaded) {
+      return;
+    }
+
     // Wait for servers, or finish when auto-connect has no usable target.
     final serversController = ServersScope.controllerOf(context);
     if (!state.enabled || state.lastServerId == null || serversController.servers.isEmpty) {
@@ -133,6 +144,7 @@ class _AutoConnectOnLaunchSettingsScopeState extends State<AutoConnectOnLaunchSe
       server: server,
       routingProfile: routingProfile,
       excludedRoutes: excludedRoutes,
+      splitTunnel: splitTunnelController.savedSettings,
       logLevel: switch (loggingController.securityType) {
         LoggingSecurityType.stripped => VpnConfigurationLogLevel.error,
         LoggingSecurityType.full => switch (loggingController.loggingLevel) {
