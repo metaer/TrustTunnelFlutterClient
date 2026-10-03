@@ -19,6 +19,7 @@ import 'package:vpn_plugin/models/endpoint.dart';
 import 'package:vpn_plugin/models/ini_document.dart';
 import 'package:vpn_plugin/models/socks.dart';
 import 'package:vpn_plugin/models/tun.dart';
+import 'package:vpn_plugin/models/tun_split_tunnel_mode.dart';
 import 'package:vpn_plugin/models/upstream_protocol.dart';
 import 'package:vpn_plugin/models/vpn_mode.dart';
 
@@ -112,6 +113,12 @@ abstract final class ConfigurationCodecKeys {
   /// TUN MTU key.
   static const mtuSize = 'mtu_size';
 
+  /// TUN per-app routing mode key (`off` | `include` | `exclude`, Android only).
+  static const splitTunnelMode = 'split_tunnel_mode';
+
+  /// TUN per-app routing package list key (Android only).
+  static const splitTunnelApps = 'split_tunnel_apps';
+
   // Socks keys
   /// SOCKS listener bind address key.
   static const socksAddress = 'address';
@@ -196,6 +203,8 @@ final class ConfigurationEncoder extends Converter<Configuration, String> {
     tun.setStringList(ConfigurationCodecKeys.includedRoutes, config.tun.includedRoutes);
     tun.setStringList(ConfigurationCodecKeys.excludedRoutes, config.tun.excludedRoutes);
     tun.setInt(ConfigurationCodecKeys.mtuSize, config.tun.mtuSize);
+    tun.setString(ConfigurationCodecKeys.splitTunnelMode, config.tun.splitTunnelMode.value);
+    tun.setStringList(ConfigurationCodecKeys.splitTunnelApps, config.tun.splitTunnelApps);
 
     // final IniSection socks = document.section(ConfigurationCodecKeys.socksSection);
     // socks.setString(ConfigurationCodecKeys.socksAddress, config.socks.address);
@@ -280,6 +289,9 @@ final class ConfigurationDecoder extends Converter<String, Configuration> {
         tun.getStringList(ConfigurationCodecKeys.includedRoutes) ?? IniConst.defaultTunRoutes;
     final List<String> excludedRoutes = tun.getStringList(ConfigurationCodecKeys.excludedRoutes) ?? const <String>[];
     final int mtuSize = tun.getInt(ConfigurationCodecKeys.mtuSize) ?? IniConst.defaultTunMtu;
+    final String splitTunnelModeStr =
+        tun.getString(ConfigurationCodecKeys.splitTunnelMode) ?? TunSplitTunnelMode.off.value;
+    final List<String> splitTunnelApps = tun.getStringList(ConfigurationCodecKeys.splitTunnelApps) ?? const <String>[];
 
     final String socksAddress = socks.getString(ConfigurationCodecKeys.socksAddress) ?? IniConst.defaultSocksAddress;
     final String socksUsername = socks.getString(ConfigurationCodecKeys.socksUsername) ?? '';
@@ -329,6 +341,13 @@ final class ConfigurationDecoder extends Converter<String, Configuration> {
         includedRoutes: includedRoutes,
         excludedRoutes: excludedRoutes,
         mtuSize: mtuSize,
+        splitTunnelMode: _enumByValue(
+          TunSplitTunnelMode.values,
+          splitTunnelModeStr,
+          (e) => e.value,
+          fallback: TunSplitTunnelMode.off,
+        ),
+        splitTunnelApps: splitTunnelApps,
       ),
       socks: Socks(
         address: socksAddress,
