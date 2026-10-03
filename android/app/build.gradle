@@ -39,6 +39,11 @@ def getSigningProp = { String name ->
     return v != null ? v.toString() : null
 }
 
+// Application id and launcher label, e.g. to install a build next to the official app.
+// Override with the `ttAppId` / `ttAppLabel` Gradle properties: android/gradle.properties, -P or ORG_GRADLE_PROJECT_*.
+def ttAppId = (project.findProperty("ttAppId") ?: "com.adguard.trusttunnel").toString()
+def ttAppLabel = (project.findProperty("ttAppLabel") ?: "TrustTunnel").toString()
+
 android {
     namespace = "com.adguard.trusttunnel"
     compileSdk = 36
@@ -55,13 +60,14 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.adguard.trusttunnel"
+        applicationId = ttAppId
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdk = 26
         targetSdk = 36
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+        resValue "string", "app_name", ttAppLabel
     }
 
     signingConfigs {

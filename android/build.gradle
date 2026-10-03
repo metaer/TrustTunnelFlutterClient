@@ -10,18 +10,23 @@ def getGprProp = { String name ->
     return null
 }
 
+// Maven repository with the TrustTunnel client library (com.adguard.trusttunnel:trusttunnel-client-android).
+// Override with the `ttLibRepoUrl` Gradle property: android/gradle.properties, -P or ORG_GRADLE_PROJECT_ttLibRepoUrl.
+def ttLibRepoUrl = (project.findProperty("ttLibRepoUrl") ?: "https://maven.pkg.github.com/TrustTunnel/TrustTunnelClient").toString()
 
 allprojects {
     repositories {
         google()
         mavenCentral()
         maven {
-            url = uri("https://maven.pkg.github.com/TrustTunnel/TrustTunnelClient")
+            url = uri(ttLibRepoUrl)
             credentials {
                 username = ""
                 password = getGprProp("gpr.key")
             }
             authentication { basic(BasicAuthentication) }
+            // GitHub Packages only hosts the client library; never ask it for anything else.
+            content { includeGroup("com.adguard.trusttunnel") }
         }
     }
 }
