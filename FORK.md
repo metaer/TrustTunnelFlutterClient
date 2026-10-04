@@ -33,12 +33,17 @@ Android allows only one active VPN at a time, so use one app or the other.
    Other platforms always send `off`; the native core ignores both keys.
 3. The client library ([metaer/TrustTunnelClient](https://github.com/metaer/TrustTunnelClient),
    branch `split-tunnel`) applies them with `VpnService.Builder.addAllowedApplication` /
-   `addDisallowedApplication`. Uninstalled apps are skipped. If *Only selected apps* ends up with no
-   installed app, it falls back to routing every app through the VPN instead of failing.
+   `addDisallowedApplication`; Android ignores apps that are not installed. If none of the apps
+   selected for *Only selected apps* is installed, it routes every app through the VPN instead of
+   failing.
 
 ## One-time setup (GitHub)
 
-1. **Enable Actions** in both forks (Actions tab → enable workflows).
+1. **Enable Actions** in both forks (Actions tab → enable workflows). Recommended: make
+   `split-tunnel` the **default branch** of both forks (Settings → General → Default branch).
+   GitHub only shows the *Run workflow* button for workflows on the default branch, and the fork
+   workflows exist only on `split-tunnel`. Without it, start manual runs with
+   `gh workflow run <workflow file> --ref split-tunnel` instead.
 2. In this repository, **disable the inherited upstream workflows** (Actions → workflow → ⋯ →
    Disable workflow): *Testing*, *Build & Deploy*, *Tag and deploy*, *Mirror*. They need AdGuard's
    self-hosted runners, private registry and Vault. Disable them in the UI instead of deleting the
@@ -103,8 +108,8 @@ make init
 flutter build apk --release --build-name=1.2.0-split.local --build-number=1
 ```
 
-`flutter build` cannot pass `-P` options to Gradle; override the `tt*` properties with environment
-variables instead, for example `ORG_GRADLE_PROJECT_ttLibVersion=1.1.5-rc.6-split.2 flutter build apk …`.
+Override the `tt*` properties with `flutter build apk -P<name>=<value>` (for example
+`-PttLibVersion=1.1.5-rc.6-split.2`) or with `ORG_GRADLE_PROJECT_<name>` environment variables.
 
 To build against a local checkout of the client library instead of GitHub Packages, copy
 `android/template.libs.gradle` to `android/libs.gradle` (git-ignored) and point `includeBuild` at the
@@ -127,9 +132,12 @@ The client library is based on tag `v1.1.5-rc.6`, the version upstream's app use
 - **New client library change:** commit it on `split-tunnel` in the client fork, tag
   `android-lib/v1.1.5-rc.6-split.<n+1>`, then set `ttLibVersion` in `android/gradle.properties`.
 - **Rebasing on upstream:** `git fetch upstream && git rebase upstream/master` on `split-tunnel`.
-  If upstream changes the client library version in `plugins/vpn_plugin/android/build.gradle`,
-  keep the `$ttLibVersion` line, update its default, rebase the client fork's `split-tunnel` onto
-  the matching tag, publish `<tag>-split.1` and update `ttLibVersion`.
+  If upstream changes the client library version in `plugins/vpn_plugin/android/build.gradle`
+  (say to `<new>`), keep the `$ttLibVersion` line and update its default. In the client fork,
+  rebase `split-tunnel` onto tag `v<new>` and, in the same push, set `DEFAULT_BASE_VERSION` in
+  `.github/workflows/fork-android-lib.yml` to `<new>`; otherwise branch builds package the old
+  native libraries and the new tag is rejected. Then tag `android-lib/v<new>-split.1`, set
+  `ttLibVersion=<new>-split.1` here and replace `1.1.5-rc.6` in this file.
 
 Fork-only changes, to leave out of upstream pull requests: this file,
 `.github/workflows/fork-build-apk.yml` and the `tt*` lines in `android/gradle.properties`. Everything
@@ -149,4 +157,4 @@ proposed upstream.
   opposite.
 - With *Settings → App logging → Sensitive data* set to *Included* (the VPN library only logs
   informational messages then), the exported logs contain a line like
-  `Split tunnel: mode=include (requested=include) allowed=1 disallowed=0 dropped=0`.
+  `Split tunnel: mode=include (requested=include) allowed=1 disallowed=0 unresolved=0`.
